@@ -44,18 +44,21 @@ public class RatingsController(ILogger<RatingsController> logger, DataContext co
     
     [HttpPost("deleteRating")]
     public async Task<IActionResult> DeleteRating(
-        [FromBody, Required] RatingInDto ratingInDto
-    )
+        [FromBody, Required] Guid userId,
+        [Required] Guid postId
+        )
     {
-        if (string.IsNullOrWhiteSpace(ratingInDto.Message))
+        if (!await context.Users.AnyAsync(user => user.Id == userId))
         {
-            return BadRequest("Message cannot be empty.");
+            return NotFound("You need to be logged in to create a rating");
         }
         
-        var RatingId = Guid.Parse("cb45e25d-0140-4a1e-a110-6cb6fbffabb0");
-        var FinnBorchersId = Guid.Parse("38954af2-c515-46ec-a501-cde342792d12");
-
-        await context.Ratings.Where(rating => rating.CreatorId == FinnBorchersId && rating.PostId == RatingId)
+        if (!await context.Posts.AnyAsync(post => post.Id == postId))
+        {
+            return BadRequest("Post does not exist");
+        }
+        
+        await context.Ratings.Where(rating => rating.CreatorId == userId && rating.PostId == postId)
             .ExecuteDeleteAsync();
         await context.SaveChangesAsync();
 
