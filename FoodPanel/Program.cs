@@ -1,5 +1,6 @@
 using FoodPanel;
 using Microsoft.EntityFrameworkCore;
+using Minio;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -8,6 +9,11 @@ builder.Services.AddDbContext<DataContext>(options =>
 {
     options.UseNpgsql(Environment.GetEnvironmentVariable("DATABASE_URL"));
 });
+builder.Services.AddMinio(configureClient => configureClient
+    .WithEndpoint("localhost", 9000)
+    .WithCredentials("foodpanel", "foodpanel")
+    .WithSSL(false)
+    .Build());
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle

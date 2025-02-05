@@ -11,7 +11,7 @@ namespace FoodPanel.Controllers;
 [Route("/api/v1/[controller]")]
 public class RatingsController(ILogger<RatingsController> logger, DataContext context) : ControllerBase
 {
-    [HttpPost(Name = "CreateRating")]
+    [HttpPost("createRating")]
     public async Task<IActionResult> CreateRating(
         [FromBody, Required] RatingInDto ratingInDto
     )
@@ -35,7 +35,7 @@ public class RatingsController(ILogger<RatingsController> logger, DataContext co
     }
     
     
-    [HttpPost(Name = "DeleteRating")]
+    [HttpPost("deleteRating")]
     public async Task<IActionResult> DeleteRating(
         [FromBody, Required] RatingInDto ratingInDto
     )
@@ -55,7 +55,7 @@ public class RatingsController(ILogger<RatingsController> logger, DataContext co
         return Created();
     }
     
-    [HttpGet(Name = "GetRatingsByPostId")]
+    [HttpGet("getRatingsByPostId")]
     public async Task<IActionResult> GetRatingsByPostId(
         [FromQuery, Required] Guid postId
     )
@@ -70,7 +70,7 @@ public class RatingsController(ILogger<RatingsController> logger, DataContext co
         return Ok(ratings);
     }
     
-    [HttpGet(Name = "GetAllRatings")]
+    [HttpGet("getAllRatings")]
     public async Task<IActionResult> GetAllRatings()
     {
         var ratings = await context.Ratings.ToArrayAsync();

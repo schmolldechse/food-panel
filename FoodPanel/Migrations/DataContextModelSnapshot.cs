@@ -49,7 +49,8 @@ namespace FoodPanel.Migrations
 
             modelBuilder.Entity("FoodPanel.Models.Rating", b =>
                 {
-                    b.Property<Guid>("PostId")
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
                     b.Property<Guid>("CreatorId")
@@ -59,9 +60,17 @@ namespace FoodPanel.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.HasKey("PostId", "CreatorId");
+                    b.Property<Guid>("PostId")
+                        .HasColumnType("uuid");
+
+                    b.Property<double>("Stars")
+                        .HasColumnType("double precision");
+
+                    b.HasKey("Id");
 
                     b.HasIndex("CreatorId");
+
+                    b.HasIndex("PostId");
 
                     b.ToTable("Ratings");
                 });
