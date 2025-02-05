@@ -10,80 +10,65 @@ namespace FoodPanel.Controllers;
 [Route("/api/v1/[controller]")]
 public class RatingsController(ILogger<RatingsController> logger, DataContext context) : ControllerBase
 {
-    [HttpPost("createRating")]
-    public async Task<IActionResult> CreateRating([FromBody, Required] RatingInDto ratingInDto)
-    {
-        if (!await context.Users.AnyAsync(user => user.Id == ratingInDto.UserId))
-        {
-            return NotFound("You need to be logged in to create a rating");
-        }
-        
-        if (!await context.Posts.AnyAsync(post => post.Id == ratingInDto.PostId))
-        {
-            return BadRequest("Post does not exist");
-        }
-        
-        if (string.IsNullOrWhiteSpace(ratingInDto.Message))
-        {
-            return BadRequest("Message cannot be empty");
-        }
+	[HttpPost("createRating")]
+	public async Task<IActionResult> CreateRating([FromBody] [Required] RatingInDto ratingInDto)
+	{
+		if (!await context.Users.AnyAsync(user => user.Id == ratingInDto.UserId))
+			return NotFound("You need to be logged in to create a rating");
 
-        var newRating = new Rating()
-        {
-            PostId = ratingInDto.PostId,
-            CreatorId = ratingInDto.UserId,
-            Message = ratingInDto.Message
-        };
+		if (!await context.Posts.AnyAsync(post => post.Id == ratingInDto.PostId))
+			return BadRequest("Post does not exist");
 
-        await context.Ratings.AddAsync(newRating);
-        await context.SaveChangesAsync();
+		if (string.IsNullOrWhiteSpace(ratingInDto.Message)) return BadRequest("Message cannot be empty");
 
-        return Created();
-    }
-    
-    
-    [HttpPost("deleteRating")]
-    public async Task<IActionResult> DeleteRating(
-        [FromBody, Required] Guid userId,
-        [Required] Guid postId
-        )
-    {
-        if (!await context.Users.AnyAsync(user => user.Id == userId))
-        {
-            return NotFound("You need to be logged in to create a rating");
-        }
-        
-        if (!await context.Posts.AnyAsync(post => post.Id == postId))
-        {
-            return BadRequest("Post does not exist");
-        }
-        
-        await context.Ratings.Where(rating => rating.CreatorId == userId && rating.PostId == postId)
-            .ExecuteDeleteAsync();
-        await context.SaveChangesAsync();
+		var newRating = new Rating
+		{
+			PostId = ratingInDto.PostId,
+			CreatorId = ratingInDto.UserId,
+			Message = ratingInDto.Message
+		};
 
-        return Created();
-    }
-    
-    [HttpGet("getRatingsByPostId")]
-    public async Task<IActionResult> GetRatingsByPostId(
-        [FromQuery, Required] Guid postId
-    )
-    {
-        var posts = await context.Posts.FindAsync(postId);
-        if (posts == null)
-        {
-            return NotFound("Post does not exist.");
-        }
+		await context.Ratings.AddAsync(newRating);
+		await context.SaveChangesAsync();
 
-        var ratings = await context.Ratings.Where(rating => rating.PostId == postId).ToArrayAsync();
-        return Ok(ratings);
-    }
-    
-    [HttpGet("getAllRatings")]
-    public async Task<IActionResult> GetAllRatings()
-    {
-        var ratings = await context.Ratings.ToArrayAsync();
-        return Ok(ratings);
-    }
+		return Created();
+	}
+
+
+	[HttpPost("deleteRating")]
+	public async Task<IActionResult> DeleteRating(
+		[FromBody] [Required] Guid userId,
+		[Required] Guid postId
+	)
+	{
+		if (!await context.Users.AnyAsync(user => user.Id == userId))
+			return NotFound("You need to be logged in to create a rating");
+
+		if (!await context.Posts.AnyAsync(post => post.Id == postId)) return BadRequest("Post does not exist");
+
+		await context.Ratings.Where(rating => rating.CreatorId == userId && rating.PostId == postId)
+			.ExecuteDeleteAsync();
+		await context.SaveChangesAsync();
+
+		return Created();
+	}
+
+	[HttpGet("getRatingsByPostId")]
+	public async Task<IActionResult> GetRatingsByPostId(
+		[FromQuery] [Required] Guid postId
+	)
+	{
+		var posts = await context.Posts.FindAsync(postId);
+		if (posts == null) return NotFound("Post does not exist.");
+
+		var ratings = await context.Ratings.Where(rating => rating.PostId == postId).ToArrayAsync();
+		return Ok(ratings);
+	}
+
+	[HttpGet("getAllRatings")]
+	public async Task<IActionResult> GetAllRatings()
+	{
+		var ratings = await context.Ratings.ToArrayAsync();
+		return Ok(ratings);
+	}
 }
