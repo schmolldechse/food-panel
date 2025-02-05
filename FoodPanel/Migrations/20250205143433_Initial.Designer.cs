@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace FoodPanel.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20250205122842_Initial")]
+    [Migration("20250205143433_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -52,7 +52,8 @@ namespace FoodPanel.Migrations
 
             modelBuilder.Entity("FoodPanel.Models.Rating", b =>
                 {
-                    b.Property<Guid>("PostId")
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
                     b.Property<Guid>("CreatorId")
@@ -62,9 +63,17 @@ namespace FoodPanel.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.HasKey("PostId", "CreatorId");
+                    b.Property<Guid>("PostId")
+                        .HasColumnType("uuid");
+
+                    b.Property<double>("Stars")
+                        .HasColumnType("double precision");
+
+                    b.HasKey("Id");
 
                     b.HasIndex("CreatorId");
+
+                    b.HasIndex("PostId");
 
                     b.ToTable("Ratings");
                 });

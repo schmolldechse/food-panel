@@ -48,13 +48,15 @@ namespace FoodPanel.Migrations
                 name: "Ratings",
                 columns: table => new
                 {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
                     PostId = table.Column<Guid>(type: "uuid", nullable: false),
                     CreatorId = table.Column<Guid>(type: "uuid", nullable: false),
+                    Stars = table.Column<double>(type: "double precision", nullable: false),
                     Message = table.Column<string>(type: "text", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Ratings", x => new { x.PostId, x.CreatorId });
+                    table.PrimaryKey("PK_Ratings", x => x.Id);
                     table.ForeignKey(
                         name: "FK_Ratings_Posts_PostId",
                         column: x => x.PostId,
@@ -78,6 +80,11 @@ namespace FoodPanel.Migrations
                 name: "IX_Ratings_CreatorId",
                 table: "Ratings",
                 column: "CreatorId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Ratings_PostId",
+                table: "Ratings",
+                column: "PostId");
         }
 
         /// <inheritdoc />
