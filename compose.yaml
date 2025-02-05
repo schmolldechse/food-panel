@@ -1,6 +1,33 @@
 ﻿services:
   foodpanel:
     image: foodpanel
+    container_name: foodpanel
     build:
       context: .
       dockerfile: FoodPanel/Dockerfile
+    environment:
+      DATABASE_URL: Host=db;Port=5432;Username=${POSTGRES_USER};Password=${POSTGRES_PASSWORD};Database=${POSTGRES_DB};
+    ports:
+      - "8080:8080"
+    networks:
+      - foodpanel-net
+
+  db:
+    image: postgres
+    container_name: navigator-db
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - foodpanel-net
+
+volumes:
+  postgres_data:
+
+networks:
+  foodpanel-net:
