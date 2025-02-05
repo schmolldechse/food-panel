@@ -1,5 +1,4 @@
 using System.ComponentModel.DataAnnotations;
-using System.Runtime.CompilerServices;
 using FoodPanel.Models;
 using FoodPanel.Models.Dto;
 using Microsoft.AspNetCore.Mvc;
@@ -12,19 +11,27 @@ namespace FoodPanel.Controllers;
 public class RatingsController(ILogger<RatingsController> logger, DataContext context) : ControllerBase
 {
     [HttpPost("createRating")]
-    public async Task<IActionResult> CreateRating(
-        [FromBody, Required] RatingInDto ratingInDto
-    )
+    public async Task<IActionResult> CreateRating([FromBody, Required] RatingInDto ratingInDto)
     {
+        if (!await context.Users.AnyAsync(user => user.Id == ratingInDto.UserId))
+        {
+            return NotFound("You need to be logged in to create a rating");
+        }
+        
+        if (!await context.Posts.AnyAsync(post => post.Id == ratingInDto.PostId))
+        {
+            return BadRequest("Post does not exist");
+        }
+        
         if (string.IsNullOrWhiteSpace(ratingInDto.Message))
         {
-            return BadRequest("Message cannot be empty.");
+            return BadRequest("Message cannot be empty");
         }
 
         var newRating = new Rating()
         {
-            PostId = Guid.TryParse("cb45e25d-0140-4a1e-a110-6cb6fbffabb0", out Guid postId) ? postId : Guid.NewGuid(),
-            CreatorId = Guid.TryParse("38954af2-c515-46ec-a501-cde342792d12", out Guid userGuid) ? userGuid : Guid.NewGuid(),
+            PostId = ratingInDto.PostId,
+            CreatorId = ratingInDto.UserId,
             Message = ratingInDto.Message
         };
 
