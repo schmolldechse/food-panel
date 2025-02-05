@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using System.Runtime.CompilerServices;
 using FoodPanel.Models;
 using FoodPanel.Models.Dto;
 using Microsoft.AspNetCore.Mvc;
@@ -54,5 +55,19 @@ public class RatingsController(ILogger<RatingsController> logger, DataContext co
         return Created();
     }
     
+    [HttpGet(Name = "GetRatingsByPostId")]
+    public async Task<IActionResult> GetRatingsByPostId(
+        [FromQuery, Required] Guid postId
+    )
+    {
+        var posts = await context.Posts.FindAsync(postId);
+        if (posts == null)
+        {
+            return NotFound("Post does not exist.");
+        }
+
+        var ratings = await context.Ratings.Where(rating => rating.PostId == postId).ToArrayAsync();
+        return Ok(ratings);
+    }
     
 }
