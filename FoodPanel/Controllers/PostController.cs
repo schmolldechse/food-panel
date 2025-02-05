@@ -17,10 +17,28 @@ public class PostController(IMinioClient minio, DataContext db) : ControllerBase
 	[HttpGet]
 	public async Task<IActionResult> GetAllPosts()
 	{
-		return Ok();
+		var posts = await db.Posts
+			.GroupJoin(
+				db.Ratings,
+				post => post.Id,
+				rating => rating.PostId,
+				(post, ratings) => new { Post = post, Ratings = ratings }
+			)
+			.Select(result => new PostOutDto
+			{
+				Id = result.Post.Id,
+				CreatorId = result.Post.CreatorId,
+				Title = result.Post.Title,
+				Message = result.Post.Message,
+				CommentAmount = result.Ratings.Count(),
+				AverageRating = result.Ratings.Any() ? result.Ratings.Average(r => r.Stars) : 0
+			})
+			.ToArrayAsync();
+		
+		return Ok(posts);
 	}
 
-	[HttpGet("/{userId:guid}")]
+	[HttpGet("{userId:guid}")]
 	public async Task<IActionResult> GetPostByUser(Guid userId)
 	{
 		if (!await db.Users.AnyAsync(p => p.Id == userId)) return NotFound("User was not found");
