@@ -70,4 +70,10 @@ public class RatingsController(ILogger<RatingsController> logger, DataContext co
         return Ok(ratings);
     }
     
+    [HttpGet(Name = "GetAllRatings")]
+    public async Task<IActionResult> GetAllRatings()
+    {
+        var ratings = await context.Ratings.ToArrayAsync();
+        return Ok(ratings);
+    }
 }
