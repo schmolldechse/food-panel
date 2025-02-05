@@ -2,6 +2,7 @@ using System.ComponentModel.DataAnnotations;
 using FoodPanel.Models;
 using FoodPanel.Models.Dto;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace FoodPanel.Controllers;
 
@@ -19,27 +20,10 @@ public class RatingsController(ILogger<RatingsController> logger, DataContext co
             return BadRequest("Message cannot be empty.");
         }
 
-        var newUser = new User()
-        {
-            Id = Guid.NewGuid(),
-            Name = "Fonn Borchers",
-            UserHandle = "finnistcool"
-        };
-        await context.Users.AddAsync(newUser);
-
-        var newPost = new Post()
-        {
-            Id = Guid.NewGuid(),
-            CreatorId = newUser.Id,
-            Title = "Finn Borchers",
-            Message = "Finn Borchers ist cool",
-        };
-        await context.Posts.AddAsync(newPost);
-
         var newRating = new Rating()
         {
-            PostId = newPost.Id,
-            CreatorId = newUser.Id,
+            PostId = Guid.TryParse("cb45e25d-0140-4a1e-a110-6cb6fbffabb0", out Guid postId) ? postId : Guid.NewGuid(),
+            CreatorId = Guid.TryParse("38954af2-c515-46ec-a501-cde342792d12", out Guid userGuid) ? userGuid : Guid.NewGuid(),
             Message = ratingInDto.Message
         };
 
@@ -48,4 +32,27 @@ public class RatingsController(ILogger<RatingsController> logger, DataContext co
 
         return Created();
     }
+    
+    
+    [HttpPost(Name = "DeleteRating")]
+    public async Task<IActionResult> DeleteRating(
+        [FromBody, Required] RatingInDto ratingInDto
+    )
+    {
+        if (string.IsNullOrWhiteSpace(ratingInDto.Message))
+        {
+            return BadRequest("Message cannot be empty.");
+        }
+        
+        var RatingId = Guid.Parse("cb45e25d-0140-4a1e-a110-6cb6fbffabb0");
+        var FinnBorchersId = Guid.Parse("38954af2-c515-46ec-a501-cde342792d12");
+
+        await context.Ratings.Where(rating => rating.CreatorId == FinnBorchersId && rating.PostId == RatingId)
+            .ExecuteDeleteAsync();
+        await context.SaveChangesAsync();
+
+        return Created();
+    }
+    
+    
 }
