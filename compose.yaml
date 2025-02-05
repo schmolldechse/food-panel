@@ -1,0 +1,6 @@
+﻿services:
+  foodpanel:
+    image: foodpanel
+    build:
+      context: .
+      dockerfile: FoodPanel/Dockerfile
