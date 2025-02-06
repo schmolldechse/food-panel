@@ -1,52 +1,54 @@
-<script>
-	import { Sidebar, SidebarGroup, SidebarItem, SidebarWrapper } from 'flowbite-svelte';
-	import { ArrowRightToBracketOutline, EditOutline, EditSolid, HomeSolid, UserSolid } from 'flowbite-svelte-icons';
+<script lang="ts">
 	import { page } from '$app/state';
-
-	let spanClass = 'flex-1 ms-3 whitespace-nowrap';
-	let activeUrl = $derived(page.url.pathname);
-
-	let signedIn = $state(true);
+	import { HomeIcon, PlusIcon, UserIcon } from 'lucide-svelte';
 </script>
 
-<Sidebar {activeUrl}>
-	<SidebarWrapper>
-		<SidebarGroup>
-			<SidebarItem label="Home" href="/">
-				<svelte:fragment slot="icon">
-					<HomeSolid
-						class="w-6 h-6 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white" />
-				</svelte:fragment>
-			</SidebarItem>
-			{#if signedIn}
-				<SidebarItem label="Profile" {spanClass} href="/@userprofile" active={activeUrl.startsWith("/@")}>
-					<svelte:fragment slot="icon">
-						<UserSolid
-							class="w-6 h-6 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white" />
-					</svelte:fragment>
-				</SidebarItem>
-			{:else}
-				<SidebarItem label="Sign In">
-					<svelte:fragment slot="icon">
-						<ArrowRightToBracketOutline
-							class="w-6 h-6 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white" />
-					</svelte:fragment>
-				</SidebarItem>
-				<SidebarItem label="Sign Up">
-					<svelte:fragment slot="icon">
-						<EditOutline
-							class="w-6 h-6 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white" />
-					</svelte:fragment>
-				</SidebarItem>
-			{/if}
-		</SidebarGroup>
-		<SidebarGroup border>
-			<SidebarItem label="Create a post">
-				<svelte:fragment slot="icon">
-					<EditSolid
-						class="w-6 h-6 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white" />
-				</svelte:fragment>
-			</SidebarItem>
-		</SidebarGroup>
-	</SidebarWrapper>
-</Sidebar>
+<style>
+    .button-base {
+        @apply rounded-3xl p-4 m-2 w-fit;
+    }
+
+    .button-hover {
+        @apply hover:bg-secondary ;
+    }
+</style>
+
+<aside class="bg-primary text-white w-64 py-[1.5px]">
+
+	<nav class="flex flex-col gap-y-0">
+		<div class="p-4">
+			<span class="text-xl font-bold font-michroma">Foodpanel</span>
+		</div>
+
+		<!-- Divider -->
+		<div class="my-1">
+			<div class="border-t border-white/100 mx-2 "></div>
+		</div>
+
+		<!-- Home -->
+		<a href="/" class="flex items-center button-base button-hover" class:bg-secondary={page.url.pathname === "/"}>
+			<HomeIcon />
+			<span class="ml-4">Home</span>
+		</a>
+
+		<!-- Profile -->
+		<a href="/@userhandle" class="flex items-center button-base button-hover"
+			 class:bg-secondary={page.url.pathname === "/@userhandle"}>
+			<UserIcon />
+			<span class="ml-4">Profile</span>
+		</a>
+
+		<!-- Divider -->
+		<div class="my-1">
+			<div class="border-t border-white/100 mx-2 "></div>
+		</div>
+
+		<!-- Create Post -->
+		<button class="flex items-center button-base bg-secondary">
+			<PlusIcon />
+			<span class="ml-4">Create new Post</span>
+		</button>
+
+	</nav>
+</aside>
+
