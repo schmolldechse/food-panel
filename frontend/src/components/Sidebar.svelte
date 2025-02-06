@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { page } from '$app/state';
-	import { HomeIcon, PlusIcon, UserIcon } from 'lucide-svelte';
+	import { page } from "$app/state";
+	import { HomeIcon, PlusIcon, UserIcon } from "lucide-svelte";
 </script>
 
 <style>
@@ -33,7 +33,7 @@
 
 		<!-- Profile -->
 		<a href="/@userhandle" class="flex items-center button-base button-hover"
-			 class:bg-secondary={page.url.pathname === "/@userhandle"}>
+		   class:bg-secondary={page.url.pathname === "/@userhandle"}>
 			<UserIcon />
 			<span class="ml-4">Profile</span>
 		</a>
@@ -44,10 +44,10 @@
 		</div>
 
 		<!-- Create Post -->
-		<button class="flex items-center button-base bg-secondary">
+		<a href="/createPost" class="flex items-center button-base bg-secondary">
 			<PlusIcon />
 			<span class="ml-4">Create new Post</span>
-		</button>
+		</a>
 
 	</nav>
 </aside>

@@ -1,6 +1,6 @@
 <script lang="ts">
-	import '../app.css';
-	import Sidebar from '$components/Sidebar.svelte';
+	import "../app.css";
+	import Sidebar from "$components/Sidebar.svelte";
 
 	let { children } = $props();
 </script>
@@ -10,9 +10,11 @@
 		<Sidebar />
 	</div>
 
-	<div class="flex-[6]">
+	<div class="flex-[6] border-x">
 		{@render children()}
 	</div>
+
+	<div class="flex-[1]"></div>
 </div>
 
 

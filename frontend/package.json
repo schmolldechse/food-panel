@@ -11,7 +11,8 @@
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
 		"format": "prettier --write .",
-		"lint": "prettier --check ."
+		"lint": "prettier --check .",
+		"swagger": "sta -p http://localhost:5226/api/swagger/v1/swagger.json -o src/lib/api --module-name-index 2 --single-http-client"
 	},
 	"devDependencies": {
 		"@sveltejs/adapter-node": "^5.2.11",
@@ -29,6 +30,7 @@
 	},
 	"dependencies": {
 		"@fontsource/michroma": "^5.1.1",
-		"lucide-svelte": "^0.474.0"
+		"lucide-svelte": "^0.474.0",
+		"swagger-typescript-api": "^13.0.23"
 	}
 }
