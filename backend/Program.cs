@@ -1,26 +1,28 @@
 using FoodPanel;
+using FoodPanel.Config;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using Minio;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Configuration.AddEnvironmentVariables("APP_");
+
+var config = new AppConfig();
+builder.Configuration.Bind(config);
+builder.Services.AddSingleton(config);
+
 // Add services to the container.
 builder.Services.AddDbContext<DataContext>(options =>
-{
-	options.UseNpgsql(Environment.GetEnvironmentVariable("DATABASE_URL"));
-});
+	options.UseNpgsql(config.Database.ConnectionString));
 
 builder.Services.AddMinio(configureClient => configureClient
-	.WithEndpoint("localhost", 9000)
-	.WithCredentials("foodpanel", "foodpanel")
-	.WithSSL(false)
+	.WithEndpoint(config.Minio.Host, config.Minio.Port)
+	.WithCredentials(config.Minio.AccessKey, config.Minio.SecretKey)
+	.WithSSL(config.Minio.SSL)
 	.Build());
 
-builder.Services.AddCors(options =>
-{
-	options.AddPolicy(name: "*", policy => policy.AllowAnyOrigin());
-});
+builder.Services.AddCors(options => { options.AddPolicy(name: "*", policy => policy.AllowAnyOrigin()); });
 
 builder.Services.AddControllers();
 

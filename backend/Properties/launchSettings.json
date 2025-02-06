@@ -16,8 +16,7 @@
       "launchUrl": "swagger",
       "applicationUrl": "http://localhost:5226",
       "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development",
-        "DATABASE_URL": "Host=localhost;Port=5432;Username=foodpanel;Password=foodpanel;Database=foodpanel;"
+        "ASPNETCORE_ENVIRONMENT": "Development"
       }
     },
     "https": {
@@ -27,8 +26,7 @@
       "launchUrl": "swagger",
       "applicationUrl": "https://localhost:7019;http://localhost:5226",
       "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development",
-        "DATABASE_URL": "Host=localhost;Port=5432;Username=foodpanel;Password=foodpanel;Database=foodpanel;"
+        "ASPNETCORE_ENVIRONMENT": "Development"
       }
     },
     "IIS Express": {
@@ -36,8 +34,7 @@
       "launchBrowser": false,
       "launchUrl": "swagger",
       "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development",
-        "DATABASE_URL": "Host=localhost;Port=5432;Username=foodpanel;Password=foodpanel;Database=foodpanel;"
+        "ASPNETCORE_ENVIRONMENT": "Development"
       }
     }
   }
