@@ -30,12 +30,12 @@
 <div class="flex justify-center items-center">
 	<div class="w-[50rem]">
 		<div class="flex flex-col gap-4">
-			<input type="text" placeholder="Title" class="bg-primary" maxlength="128" bind:value={title}>
-			<textarea class="resize-none bg-primary" bind:value={message}></textarea>
+			<input bind:value={title} class="bg-primary" maxlength="128" placeholder="Title" type="text">
+			<textarea bind:value={message} class="resize-none bg-primary"></textarea>
 
 			<FileUpload bind:selectedFile={selectedFile} />
-			<button type="button" onclick={createPost}
-					class="w-fit flex justify-center items-center bg-accent text-2xl font-bold p-2 rounded-2xl">Post
+			<button class="w-fit flex justify-center items-center bg-accent text-2xl font-bold p-2 rounded-2xl" onclick={createPost}
+					type="button">Post
 			</button>
 		</div>
 	</div>

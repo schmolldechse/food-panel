@@ -26,14 +26,14 @@
 		</div>
 
 		<!-- Home -->
-		<a href="/" class="flex items-center button-base button-hover" class:bg-secondary={page.url.pathname === "/"}>
+		<a class="flex items-center button-base button-hover" class:bg-secondary={page.url.pathname === "/"} href="/">
 			<HomeIcon />
 			<span class="ml-4">Home</span>
 		</a>
 
 		<!-- Profile -->
-		<a href="/@userhandle" class="flex items-center button-base button-hover"
-		   class:bg-secondary={page.url.pathname === "/@userhandle"}>
+		<a class="flex items-center button-base button-hover" class:bg-secondary={page.url.pathname === "/@userhandle"}
+		   href="/@userhandle">
 			<UserIcon />
 			<span class="ml-4">Profile</span>
 		</a>
@@ -44,7 +44,7 @@
 		</div>
 
 		<!-- Create Post -->
-		<a href="/createPost" class="flex items-center button-base bg-secondary">
+		<a class="flex items-center button-base bg-secondary" href="/createPost">
 			<PlusIcon />
 			<span class="ml-4">Create new Post</span>
 		</a>
