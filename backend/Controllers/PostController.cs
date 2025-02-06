@@ -11,7 +11,7 @@ using Minio.DataModel.Args;
 namespace FoodPanel.Controllers;
 
 [ApiController]
-[Route("/api/v1/[controller]")]
+[Route("api/v1/[controller]")]
 public class PostController(IMinioClient minio, DataContext db) : ControllerBase
 {
 	[HttpGet]
@@ -66,7 +66,7 @@ public class PostController(IMinioClient minio, DataContext db) : ControllerBase
 	}
 
 	[HttpPost]
-	public async Task<IActionResult> Post([FromForm] [Required] PostInDto data)
+	public async Task<IActionResult> Post([FromForm, Required] PostInDto data)
 	{
 		var postId = Guid.NewGuid();
 

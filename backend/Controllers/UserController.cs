@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 namespace FoodPanel.Controllers;
 
 [ApiController]
-[Route("/api/v1/[controller]")]
+[Route("api/v1/[controller]")]
 public class UserController(DataContext db) : ControllerBase
 {
 

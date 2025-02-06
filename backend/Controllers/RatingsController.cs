@@ -7,10 +7,10 @@ using Microsoft.EntityFrameworkCore;
 namespace FoodPanel.Controllers;
 
 [ApiController]
-[Route("/api/v1/[controller]")]
+[Route("api/v1/[controller]")]
 public class RatingsController(ILogger<RatingsController> logger, DataContext context) : ControllerBase
 {
-	[HttpPost("createRating")]
+	[HttpPost]
 	public async Task<IActionResult> CreateRating([FromBody] [Required] RatingInDto ratingInDto)
 	{
 		if (!await context.Users.AnyAsync(user => user.Id == ratingInDto.UserId))
@@ -35,7 +35,7 @@ public class RatingsController(ILogger<RatingsController> logger, DataContext co
 	}
 
 
-	[HttpPost("deleteRating")]
+	[HttpDelete]
 	public async Task<IActionResult> DeleteRating(
 		[FromBody] [Required] Guid userId,
 		[Required] Guid postId
@@ -44,13 +44,14 @@ public class RatingsController(ILogger<RatingsController> logger, DataContext co
 		if (!await context.Users.AnyAsync(user => user.Id == userId))
 			return NotFound("You need to be logged in to create a rating");
 
-		if (!await context.Posts.AnyAsync(post => post.Id == postId)) return BadRequest("Post does not exist");
+		if (!await context.Posts.AnyAsync(post => post.Id == postId))
+			return BadRequest("Post does not exist");
 
 		await context.Ratings.Where(rating => rating.CreatorId == userId && rating.PostId == postId)
 			.ExecuteDeleteAsync();
 		await context.SaveChangesAsync();
 
-		return Created();
+		return Ok();
 	}
 
 	[HttpGet("getRatingsByPostId")]
