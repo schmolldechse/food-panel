@@ -15,6 +15,7 @@ namespace FoodPanel.Controllers;
 public class PostController(IMinioClient minio, DataContext db) : ControllerBase
 {
 	[HttpGet]
+	[ProducesResponseType(StatusCodes.Status200OK, Type = typeof(PostOutDto[]))]
 	public async Task<IActionResult> GetAllPosts()
 	{
 		var posts = await db.Posts
