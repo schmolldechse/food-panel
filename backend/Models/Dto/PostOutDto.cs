@@ -5,7 +5,8 @@ public class PostOutDto
 	public Guid Id { get; set; }
 
 	public Guid CreatorId { get; set; }
-
+	public string CreatorName { get; set; }
+	
 	public string Title { get; set; }
 	public string Message { get; set; }
 

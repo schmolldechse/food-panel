@@ -19,22 +19,19 @@ public class PostController(IMinioClient minio, DataContext db) : ControllerBase
 	public async Task<IActionResult> GetAllPosts()
 	{
 		var posts = await db.Posts
-			.GroupJoin(
-				db.Ratings,
-				post => post.Id,
-				rating => rating.PostId,
-				(post, ratings) => new { Post = post, Ratings = ratings }
-			)
-			.Select(result => new PostOutDto
+			.Include(p => p.Creator)
+			.Include(p => p.Ratings) // if Ratings is a navigation property
+			.Select(post => new PostOutDto
 			{
-				Id = result.Post.Id,
-				CreatorId = result.Post.CreatorId,
-				Title = result.Post.Title,
-				Message = result.Post.Message,
-				CommentAmount = result.Ratings.Count(),
-				AverageRating = result.Ratings.Any() ? result.Ratings.Average(r => r.Stars) : 0
+				Id = post.Id,
+				CreatorId = post.CreatorId,
+				CreatorName = post.Creator.Name,
+				Title = post.Title,
+				Message = post.Message,
+				CommentAmount = post.Ratings.Count(),
+				AverageRating = post.Ratings.Count != 0 ? post.Ratings.Average(r => r.Stars) : 0
 			})
-			.ToArrayAsync();
+			.ToListAsync();
 		
 		return Ok(posts);
 	}
@@ -74,14 +71,14 @@ public class PostController(IMinioClient minio, DataContext db) : ControllerBase
 		using var outputStream = new MemoryStream();
 
 		// Convert image to png
-		using (var imageFactory = new ImageFactory(false))
+		using (var imageFactory = new ImageFactory())
 		{
 			imageFactory.Load(data.Image.OpenReadStream())
 				.Format(new PngFormat())
 				.Save(outputStream);
 		}
 
-		var response = await minio.PutObjectAsync(new PutObjectArgs()
+		await minio.PutObjectAsync(new PutObjectArgs()
 			.WithBucket("foodpanel")
 			.WithObject($"{postId}.png")
 			.WithObjectSize(outputStream.Length)

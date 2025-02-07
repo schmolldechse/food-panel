@@ -12,4 +12,6 @@ public class Post
 	[MaxLength(128)] public string Title { get; set; }
 
 	public string Message { get; set; }
+	
+	public ICollection<Rating> Ratings { get; set; }
 }
