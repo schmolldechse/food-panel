@@ -9,6 +9,18 @@
  * ---------------------------------------------------------------
  */
 
+export interface Post {
+	/** @format uuid */
+	id?: string;
+	/** @format uuid */
+	creatorId?: string;
+	creator?: User;
+	/** @maxLength 128 */
+	title?: string | null;
+	message?: string | null;
+	ratings?: Rating[] | null;
+}
+
 export interface PostOutDto {
 	/** @format uuid */
 	id?: string;
@@ -23,6 +35,30 @@ export interface PostOutDto {
 	averageRating?: number;
 }
 
+export interface ProblemDetails {
+	type?: string | null;
+	title?: string | null;
+	/** @format int32 */
+	status?: number | null;
+	detail?: string | null;
+	instance?: string | null;
+	[key: string]: any;
+}
+
+export interface Rating {
+	/** @format uuid */
+	id?: string;
+	/** @format uuid */
+	postId?: string;
+	post?: Post;
+	/** @format uuid */
+	creatorId?: string;
+	creator?: User;
+	/** @format double */
+	stars?: number;
+	message?: string | null;
+}
+
 export interface RatingInDto {
 	/** @format uuid */
 	postId?: string;
@@ -31,10 +67,52 @@ export interface RatingInDto {
 	message?: string | null;
 }
 
-export type QueryParamsType = Record<string | number, any>;
-export type ResponseFormat = keyof Omit<Body, "body" | "bodyUsed">;
+export interface User {
+	/** @format uuid */
+	id?: string;
+	userName?: string | null;
+	normalizedUserName?: string | null;
+	email?: string | null;
+	normalizedEmail?: string | null;
+	emailConfirmed?: boolean;
+	passwordHash?: string | null;
+	securityStamp?: string | null;
+	concurrencyStamp?: string | null;
+	phoneNumber?: string | null;
+	phoneNumberConfirmed?: boolean;
+	twoFactorEnabled?: boolean;
+	/** @format date-time */
+	lockoutEnd?: string | null;
+	lockoutEnabled?: boolean;
+	/** @format int32 */
+	accessFailedCount?: number;
+	/** @maxLength 255 */
+	name?: string | null;
+	/** @maxLength 32 */
+	userHandle?: string | null;
+	posts?: Post[] | null;
+	ratings?: Rating[] | null;
+}
 
-export interface FullRequestParams extends Omit<RequestInit, "body"> {
+export interface UserOutDto {
+	/** @format uuid */
+	id?: string;
+	name?: string | null;
+	userHandle?: string | null;
+	/** @format int32 */
+	postCount?: number;
+	/** @format int32 */
+	ratingCount?: number;
+	/** @format double */
+	averageRating?: number;
+}
+
+import type { AxiosInstance, AxiosRequestConfig, AxiosResponse, HeadersDefaults, ResponseType } from "axios";
+import axios from "axios";
+
+export type QueryParamsType = Record<string | number, any>;
+
+export interface FullRequestParams extends Omit<AxiosRequestConfig, "data" | "params" | "url" | "responseType"> {
 	/** set parameter to `true` for call `securityWorker` for this request */
 	secure?: boolean;
 	/** request path */
@@ -44,30 +122,18 @@ export interface FullRequestParams extends Omit<RequestInit, "body"> {
 	/** query params */
 	query?: QueryParamsType;
 	/** format of response (i.e. response.json() -> format: "json") */
-	format?: ResponseFormat;
+	format?: ResponseType;
 	/** request body */
 	body?: unknown;
-	/** base url */
-	baseUrl?: string;
-	/** request cancellation token */
-	cancelToken?: CancelToken;
 }
 
 export type RequestParams = Omit<FullRequestParams, "body" | "method" | "query" | "path">;
 
-export interface ApiConfig<SecurityDataType = unknown> {
-	baseUrl?: string;
-	baseApiParams?: Omit<RequestParams, "baseUrl" | "cancelToken" | "signal">;
-	securityWorker?: (securityData: SecurityDataType | null) => Promise<RequestParams | void> | RequestParams | void;
-	customFetch?: typeof fetch;
+export interface ApiConfig<SecurityDataType = unknown> extends Omit<AxiosRequestConfig, "data" | "cancelToken"> {
+	securityWorker?: (securityData: SecurityDataType | null) => Promise<AxiosRequestConfig | void> | AxiosRequestConfig | void;
+	secure?: boolean;
+	format?: ResponseType;
 }
-
-export interface HttpResponse<D extends unknown, E extends unknown = unknown> extends Response {
-	data: D;
-	error: E;
-}
-
-type CancelToken = Symbol | string | number;
 
 export enum ContentType {
 	Json = "application/json",
@@ -77,166 +143,98 @@ export enum ContentType {
 }
 
 export class HttpClient<SecurityDataType = unknown> {
-	public baseUrl: string = "";
+	public instance: AxiosInstance;
 	private securityData: SecurityDataType | null = null;
 	private securityWorker?: ApiConfig<SecurityDataType>["securityWorker"];
-	private abortControllers = new Map<CancelToken, AbortController>();
-	private customFetch = (...fetchParams: Parameters<typeof fetch>) => fetch(...fetchParams);
+	private secure?: boolean;
+	private format?: ResponseType;
 
-	private baseApiParams: RequestParams = {
-		credentials: "same-origin",
-		headers: {},
-		redirect: "follow",
-		referrerPolicy: "no-referrer"
-	};
-
-	constructor(apiConfig: ApiConfig<SecurityDataType> = {}) {
-		Object.assign(this, apiConfig);
+	constructor({ securityWorker, secure, format, ...axiosConfig }: ApiConfig<SecurityDataType> = {}) {
+		this.instance = axios.create({ ...axiosConfig, baseURL: axiosConfig.baseURL || "" });
+		this.secure = secure;
+		this.format = format;
+		this.securityWorker = securityWorker;
 	}
 
 	public setSecurityData = (data: SecurityDataType | null) => {
 		this.securityData = data;
 	};
 
-	protected encodeQueryParam(key: string, value: any) {
-		const encodedKey = encodeURIComponent(key);
-		return `${encodedKey}=${encodeURIComponent(typeof value === "number" ? value : `${value}`)}`;
-	}
+	protected mergeRequestParams(params1: AxiosRequestConfig, params2?: AxiosRequestConfig): AxiosRequestConfig {
+		const method = params1.method || (params2 && params2.method);
 
-	protected addQueryParam(query: QueryParamsType, key: string) {
-		return this.encodeQueryParam(key, query[key]);
-	}
-
-	protected addArrayQueryParam(query: QueryParamsType, key: string) {
-		const value = query[key];
-		return value.map((v: any) => this.encodeQueryParam(key, v)).join("&");
-	}
-
-	protected toQueryString(rawQuery?: QueryParamsType): string {
-		const query = rawQuery || {};
-		const keys = Object.keys(query).filter((key) => "undefined" !== typeof query[key]);
-		return keys
-			.map((key) => (Array.isArray(query[key]) ? this.addArrayQueryParam(query, key) : this.addQueryParam(query, key)))
-			.join("&");
-	}
-
-	protected addQueryParams(rawQuery?: QueryParamsType): string {
-		const queryString = this.toQueryString(rawQuery);
-		return queryString ? `?${queryString}` : "";
-	}
-
-	private contentFormatters: Record<ContentType, (input: any) => any> = {
-		[ContentType.Json]: (input: any) =>
-			input !== null && (typeof input === "object" || typeof input === "string") ? JSON.stringify(input) : input,
-		[ContentType.Text]: (input: any) => (input !== null && typeof input !== "string" ? JSON.stringify(input) : input),
-		[ContentType.FormData]: (input: any) =>
-			Object.keys(input || {}).reduce((formData, key) => {
-				const property = input[key];
-				formData.append(
-					key,
-					property instanceof Blob
-						? property
-						: typeof property === "object" && property !== null
-							? JSON.stringify(property)
-							: `${property}`
-				);
-				return formData;
-			}, new FormData()),
-		[ContentType.UrlEncoded]: (input: any) => this.toQueryString(input)
-	};
-
-	protected mergeRequestParams(params1: RequestParams, params2?: RequestParams): RequestParams {
 		return {
-			...this.baseApiParams,
+			...this.instance.defaults,
 			...params1,
 			...(params2 || {}),
 			headers: {
-				...(this.baseApiParams.headers || {}),
+				...((method && this.instance.defaults.headers[method.toLowerCase() as keyof HeadersDefaults]) || {}),
 				...(params1.headers || {}),
 				...((params2 && params2.headers) || {})
 			}
 		};
 	}
 
-	protected createAbortSignal = (cancelToken: CancelToken): AbortSignal | undefined => {
-		if (this.abortControllers.has(cancelToken)) {
-			const abortController = this.abortControllers.get(cancelToken);
-			if (abortController) {
-				return abortController.signal;
+	protected stringifyFormItem(formItem: unknown) {
+		if (typeof formItem === "object" && formItem !== null) {
+			return JSON.stringify(formItem);
+		} else {
+			return `${formItem}`;
+		}
+	}
+
+	protected createFormData(input: Record<string, unknown>): FormData {
+		if (input instanceof FormData) {
+			return input;
+		}
+		return Object.keys(input || {}).reduce((formData, key) => {
+			const property = input[key];
+			const propertyContent: any[] = property instanceof Array ? property : [property];
+
+			for (const formItem of propertyContent) {
+				const isFileType = formItem instanceof Blob || formItem instanceof File;
+				formData.append(key, isFileType ? formItem : this.stringifyFormItem(formItem));
 			}
-			return void 0;
-		}
 
-		const abortController = new AbortController();
-		this.abortControllers.set(cancelToken, abortController);
-		return abortController.signal;
-	};
+			return formData;
+		}, new FormData());
+	}
 
-	public abortRequest = (cancelToken: CancelToken) => {
-		const abortController = this.abortControllers.get(cancelToken);
-
-		if (abortController) {
-			abortController.abort();
-			this.abortControllers.delete(cancelToken);
-		}
-	};
-
-	public request = async <T = any, E = any>({
-		body,
+	public request = async <T = any, _E = any>({
 		secure,
 		path,
 		type,
 		query,
 		format,
-		baseUrl,
-		cancelToken,
+		body,
 		...params
-	}: FullRequestParams): Promise<HttpResponse<T, E>> => {
+	}: FullRequestParams): Promise<AxiosResponse<T>> => {
 		const secureParams =
-			((typeof secure === "boolean" ? secure : this.baseApiParams.secure) &&
+			((typeof secure === "boolean" ? secure : this.secure) &&
 				this.securityWorker &&
 				(await this.securityWorker(this.securityData))) ||
 			{};
 		const requestParams = this.mergeRequestParams(params, secureParams);
-		const queryString = query && this.toQueryString(query);
-		const payloadFormatter = this.contentFormatters[type || ContentType.Json];
-		const responseFormat = format || requestParams.format;
+		const responseFormat = format || this.format || undefined;
 
-		return this.customFetch(`${baseUrl || this.baseUrl || ""}${path}${queryString ? `?${queryString}` : ""}`, {
+		if (type === ContentType.FormData && body && body !== null && typeof body === "object") {
+			body = this.createFormData(body as Record<string, unknown>);
+		}
+
+		if (type === ContentType.Text && body && body !== null && typeof body !== "string") {
+			body = JSON.stringify(body);
+		}
+
+		return this.instance.request({
 			...requestParams,
 			headers: {
 				...(requestParams.headers || {}),
-				...(type && type !== ContentType.FormData ? { "Content-Type": type } : {})
+				...(type ? { "Content-Type": type } : {})
 			},
-			signal: (cancelToken ? this.createAbortSignal(cancelToken) : requestParams.signal) || null,
-			body: typeof body === "undefined" || body === null ? null : payloadFormatter(body)
-		}).then(async (response) => {
-			const r = response.clone() as HttpResponse<T, E>;
-			r.data = null as unknown as T;
-			r.error = null as unknown as E;
-
-			const data = !responseFormat
-				? r
-				: await response[responseFormat]()
-						.then((data) => {
-							if (r.ok) {
-								r.data = data;
-							} else {
-								r.error = data;
-							}
-							return r;
-						})
-						.catch((e) => {
-							r.error = e;
-							return r;
-						});
-
-			if (cancelToken) {
-				this.abortControllers.delete(cancelToken);
-			}
-
-			if (!response.ok) throw data;
-			return data;
+			params: query,
+			responseType: responseFormat,
+			data: body,
+			url: path
 		});
 	};
 }
@@ -247,13 +245,85 @@ export class HttpClient<SecurityDataType = unknown> {
  *
  * API Description for Project
  */
-export class Api<SecurityDataType extends unknown> {
-	http: HttpClient<SecurityDataType>;
+export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDataType> {
+	auth = {
+		/**
+		 * No description
+		 *
+		 * @tags Auth
+		 * @name V1AuthMeList
+		 * @request GET:/api/v1/Auth/@me
+		 */
+		v1AuthMeList: (params: RequestParams = {}) =>
+			this.request<UserOutDto, UserOutDto>({
+				path: `/api/v1/Auth/@me`,
+				method: "GET",
+				format: "json",
+				...params
+			}),
 
-	constructor(http: HttpClient<SecurityDataType>) {
-		this.http = http;
-	}
+		/**
+		 * No description
+		 *
+		 * @tags Auth
+		 * @name V1AuthSigninDetail
+		 * @request GET:/api/v1/Auth/signin/{providerName}
+		 */
+		v1AuthSigninDetail: (
+			providerName: string,
+			query?: {
+				returnUrl?: string;
+			},
+			params: RequestParams = {}
+		) =>
+			this.request<void, any>({
+				path: `/api/v1/Auth/signin/${providerName}`,
+				method: "GET",
+				query: query,
+				...params
+			}),
 
+		/**
+		 * No description
+		 *
+		 * @tags Auth
+		 * @name V1AuthSignoutList
+		 * @request GET:/api/v1/Auth/signout
+		 */
+		v1AuthSignoutList: (
+			query?: {
+				returnUrl?: string;
+			},
+			params: RequestParams = {}
+		) =>
+			this.request<UserOutDto, UserOutDto>({
+				path: `/api/v1/Auth/signout`,
+				method: "GET",
+				query: query,
+				format: "json",
+				...params
+			}),
+
+		/**
+		 * No description
+		 *
+		 * @tags Auth
+		 * @name V1AuthExternalCallbackList
+		 * @request GET:/api/v1/Auth/external/callback
+		 */
+		v1AuthExternalCallbackList: (
+			query?: {
+				returnUrl?: string;
+			},
+			params: RequestParams = {}
+		) =>
+			this.request<void, void | ProblemDetails>({
+				path: `/api/v1/Auth/external/callback`,
+				method: "GET",
+				query: query,
+				...params
+			})
+	};
 	post = {
 		/**
 		 * No description
@@ -263,7 +333,7 @@ export class Api<SecurityDataType extends unknown> {
 		 * @request GET:/api/v1/Post
 		 */
 		v1PostList: (params: RequestParams = {}) =>
-			this.http.request<PostOutDto[], any>({
+			this.request<PostOutDto[], any>({
 				path: `/api/v1/Post`,
 				method: "GET",
 				format: "json",
@@ -288,7 +358,7 @@ export class Api<SecurityDataType extends unknown> {
 			},
 			params: RequestParams = {}
 		) =>
-			this.http.request<void, any>({
+			this.request<void, any>({
 				path: `/api/v1/Post`,
 				method: "POST",
 				body: data,
@@ -310,7 +380,7 @@ export class Api<SecurityDataType extends unknown> {
 			},
 			params: RequestParams = {}
 		) =>
-			this.http.request<void, any>({
+			this.request<void, ProblemDetails>({
 				path: `/api/v1/Post`,
 				method: "DELETE",
 				body: data,
@@ -326,9 +396,10 @@ export class Api<SecurityDataType extends unknown> {
 		 * @request GET:/api/v1/Post/{userId}
 		 */
 		v1PostDetail: (userId: string, params: RequestParams = {}) =>
-			this.http.request<void, any>({
+			this.request<PostOutDto[], ProblemDetails>({
 				path: `/api/v1/Post/${userId}`,
 				method: "GET",
+				format: "json",
 				...params
 			})
 	};
@@ -341,7 +412,7 @@ export class Api<SecurityDataType extends unknown> {
 		 * @request POST:/api/v1/Ratings
 		 */
 		v1RatingsCreate: (data: RatingInDto, params: RequestParams = {}) =>
-			this.http.request<void, any>({
+			this.request<void, ProblemDetails>({
 				path: `/api/v1/Ratings`,
 				method: "POST",
 				body: data,
@@ -364,7 +435,7 @@ export class Api<SecurityDataType extends unknown> {
 			data: string,
 			params: RequestParams = {}
 		) =>
-			this.http.request<void, any>({
+			this.request<void, ProblemDetails>({
 				path: `/api/v1/Ratings`,
 				method: "DELETE",
 				query: query,
@@ -387,10 +458,11 @@ export class Api<SecurityDataType extends unknown> {
 			},
 			params: RequestParams = {}
 		) =>
-			this.http.request<void, any>({
+			this.request<Rating[], ProblemDetails>({
 				path: `/api/v1/Ratings/getRatingsByPostId`,
 				method: "GET",
 				query: query,
+				format: "json",
 				...params
 			}),
 
@@ -402,24 +474,10 @@ export class Api<SecurityDataType extends unknown> {
 		 * @request GET:/api/v1/Ratings/getAllRatings
 		 */
 		v1RatingsGetAllRatingsList: (params: RequestParams = {}) =>
-			this.http.request<void, any>({
+			this.request<Rating[], any>({
 				path: `/api/v1/Ratings/getAllRatings`,
 				method: "GET",
-				...params
-			})
-	};
-	user = {
-		/**
-		 * No description
-		 *
-		 * @tags User
-		 * @name V1UserDetail
-		 * @request GET:/api/v1/User/{userId}
-		 */
-		v1UserDetail: (userId: string, params: RequestParams = {}) =>
-			this.http.request<void, any>({
-				path: `/api/v1/User/${userId}`,
-				method: "GET",
+				format: "json",
 				...params
 			})
 	};

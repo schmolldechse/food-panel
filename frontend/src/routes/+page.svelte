@@ -1,15 +1,15 @@
 <script lang="ts">
-	import apiClient from "$lib/apiClient";
+	import apiClient from "$lib/ApiClient";
 	import type {PostOutDto} from "$lib/api/Api";
 	import Post from "$components/Post.svelte";
 
 	let posts: PostOutDto[] = $state([]);
 
 	const fetchPosts = async () => {
-		const request = await apiClient.post.v1PostList();
-		if (!request.ok) return;
+		const response = await apiClient.post.v1PostList();
+		if (response.status !== 200) return;
 
-		const data = request?.data as PostOutDto[];
+		const data = response.data;
 		if (!data || !Array.isArray(data)) return;
 
 		posts = data;
