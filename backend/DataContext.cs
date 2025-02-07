@@ -1,11 +1,11 @@
 using FoodPanel.Models;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
 namespace FoodPanel;
 
-public class DataContext(DbContextOptions options) : DbContext(options)
+public class DataContext(DbContextOptions options) : IdentityDbContext<User, UserRole, Guid>(options)
 {
-	public DbSet<User> Users { get; set; }
 	public DbSet<Post> Posts { get; set; }
 	public DbSet<Rating> Ratings { get; set; }
 }

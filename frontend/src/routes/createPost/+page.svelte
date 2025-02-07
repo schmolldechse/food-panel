@@ -1,6 +1,6 @@
 <script lang="ts">
 	import FileUpload from "$components/FileUpload.svelte";
-	import apiClient from "$lib/apiClient";
+	import apiClient from "$lib/ApiClient";
 
 	import { goto } from "$app/navigation";
 

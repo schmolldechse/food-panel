@@ -1,11 +1,10 @@
 using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Identity;
 
 namespace FoodPanel.Models;
 
-public class User
+public class User : IdentityUser<Guid>
 {
-	[Key] public Guid Id { get; set; }
-
 	[MaxLength(255)] public string Name { get; set; }
 
 	[MaxLength(32)] public string UserHandle { get; set; }
