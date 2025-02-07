@@ -43,21 +43,25 @@
 
 <!-- Always-visible drag-and-drop area -->
 <div
-	class="relative border-2 border-dashed rounded-lg p-6 flex flex-col items-center justify-center cursor-pointer transition-colors duration-200 {dragActive ? 'border-blue-500 bg-blue-50' : 'border-gray-300'}"
+	class="relative flex cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed p-6 transition-colors duration-200 {dragActive
+		? 'border-blue-500 bg-blue-50'
+		: 'border-gray-300'}"
 	ondragleave={handleDragLeave}
 	ondragover={handleDragOver}
 	ondrop={handleDrop}
 	onkeydown={handleKeyDown}
 	role="button"
-	tabindex="0">
+	tabindex="0"
+>
 	<p class="text-gray-600">Drag &amp; drop your file here</p>
 	<p class="text-sm text-gray-500">or click to select</p>
 	<!-- The invisible file input covering the entire drop area -->
 	<input
-		class="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+		class="absolute inset-0 h-full w-full cursor-pointer opacity-0"
 		id="fileInput"
 		onchange={handleFileChange}
-		type="file" />
+		type="file"
+	/>
 </div>
 
 {#if selectedFile !== undefined}
