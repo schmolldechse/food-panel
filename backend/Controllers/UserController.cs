@@ -1,3 +1,4 @@
+using FoodPanel.Models;
 using FoodPanel.Models.Dto;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -10,6 +11,8 @@ public class UserController(DataContext db) : ControllerBase
 {
 
 	[HttpGet("{userId:guid}")]
+	[ProducesResponseType(StatusCodes.Status200OK, Type = typeof(UserOutDto))]
+	[ProducesResponseType(StatusCodes.Status404NotFound)]
 	public async Task<IActionResult> GetUser(Guid userId)
 	{
 		if (!await db.Users.AnyAsync(user => user.Id == userId))

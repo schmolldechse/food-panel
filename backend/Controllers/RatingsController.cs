@@ -11,6 +11,9 @@ namespace FoodPanel.Controllers;
 public class RatingsController(ILogger<RatingsController> logger, DataContext context) : ControllerBase
 {
 	[HttpPost]
+	[ProducesResponseType(StatusCodes.Status404NotFound)]
+	[ProducesResponseType(StatusCodes.Status400BadRequest)]
+	[ProducesResponseType(StatusCodes.Status201Created)]
 	public async Task<IActionResult> CreateRating([FromBody] [Required] RatingInDto ratingInDto)
 	{
 		if (!await context.Users.AnyAsync(user => user.Id == ratingInDto.UserId))
@@ -34,8 +37,9 @@ public class RatingsController(ILogger<RatingsController> logger, DataContext co
 		return Created();
 	}
 
-
 	[HttpDelete]
+	[ProducesResponseType(StatusCodes.Status404NotFound)]
+	[ProducesResponseType(StatusCodes.Status200OK)]
 	public async Task<IActionResult> DeleteRating(
 		[FromBody] [Required] Guid userId,
 		[Required] Guid postId
@@ -45,7 +49,7 @@ public class RatingsController(ILogger<RatingsController> logger, DataContext co
 			return NotFound("You need to be logged in to create a rating");
 
 		if (!await context.Posts.AnyAsync(post => post.Id == postId))
-			return BadRequest("Post does not exist");
+			return NotFound("Post does not exist");
 
 		await context.Ratings.Where(rating => rating.CreatorId == userId && rating.PostId == postId)
 			.ExecuteDeleteAsync();
@@ -55,6 +59,8 @@ public class RatingsController(ILogger<RatingsController> logger, DataContext co
 	}
 
 	[HttpGet("getRatingsByPostId")]
+	[ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Rating[]))]
+	[ProducesResponseType(StatusCodes.Status404NotFound)]
 	public async Task<IActionResult> GetRatingsByPostId(
 		[FromQuery] [Required] Guid postId
 	)
@@ -67,6 +73,7 @@ public class RatingsController(ILogger<RatingsController> logger, DataContext co
 	}
 
 	[HttpGet("getAllRatings")]
+	[ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Rating[]))]
 	public async Task<IActionResult> GetAllRatings()
 	{
 		var ratings = await context.Ratings.ToArrayAsync();

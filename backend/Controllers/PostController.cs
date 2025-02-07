@@ -28,42 +28,42 @@ public class PostController(IMinioClient minio, DataContext db) : ControllerBase
 				CreatorName = post.Creator.Name,
 				Title = post.Title,
 				Message = post.Message,
-				CommentAmount = post.Ratings.Count(),
+				CommentAmount = post.Ratings.Count,
 				AverageRating = post.Ratings.Count != 0 ? post.Ratings.Average(r => r.Stars) : 0
 			})
 			.ToListAsync();
-		
+
 		return Ok(posts);
 	}
 
 	[HttpGet("{userId:guid}")]
+	[ProducesResponseType(StatusCodes.Status200OK, Type = typeof(PostOutDto[]))]
+	[ProducesResponseType(StatusCodes.Status404NotFound)]
 	public async Task<IActionResult> GetPostByUser(Guid userId)
 	{
 		if (!await db.Users.AnyAsync(p => p.Id == userId)) return NotFound("User was not found");
 
 		var posts = await db.Posts
 			.Where(post => post.CreatorId == userId)
-			.GroupJoin(
-				db.Ratings.Where(r => r.CreatorId == userId),
-				post => post.Id,
-				rating => rating.PostId,
-				(post, ratings) => new { Post = post, Ratings = ratings }
-			)
-			.Select(result => new PostOutDto
+			.Include(p => p.Creator)
+			.Include(p => p.Ratings) // if Ratings is a navigation property
+			.Select(post => new PostOutDto
 			{
-				Id = result.Post.Id,
-				CreatorId = result.Post.CreatorId,
-				Title = result.Post.Title,
-				Message = result.Post.Message,
-				CommentAmount = result.Ratings.Count(),
-				AverageRating = result.Ratings.Any() ? result.Ratings.Average(r => r.Stars) : 0
+				Id = post.Id,
+				CreatorId = post.CreatorId,
+				CreatorName = post.Creator.Name,
+				Title = post.Title,
+				Message = post.Message,
+				CommentAmount = post.Ratings.Count,
+				AverageRating = post.Ratings.Count != 0 ? post.Ratings.Average(r => r.Stars) : 0
 			})
-			.ToArrayAsync();
+			.ToListAsync();
 
 		return Ok(posts);
 	}
 
 	[HttpPost]
+	[ProducesResponseType(StatusCodes.Status201Created)]
 	public async Task<IActionResult> Post([FromForm, Required] PostInDto data)
 	{
 		var postId = Guid.NewGuid();
@@ -94,10 +94,12 @@ public class PostController(IMinioClient minio, DataContext db) : ControllerBase
 
 		await db.SaveChangesAsync();
 
-		return Ok();
+		return Created();
 	}
 
 	[HttpDelete]
+	[ProducesResponseType(StatusCodes.Status200OK)]
+	[ProducesResponseType(StatusCodes.Status404NotFound)]
 	public async Task<IActionResult> Delete([FromForm] [Required] Guid postId)
 	{
 		if (!await db.Posts.AnyAsync(p => p.Id == postId)) return NotFound("Post was not found");
