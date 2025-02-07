@@ -21,6 +21,9 @@ public class RatingsController(ILogger<RatingsController> logger, DataContext co
 
 		if (!await context.Posts.AnyAsync(post => post.Id == ratingInDto.PostId))
 			return BadRequest("Post does not exist");
+		
+		if (ratingInDto.Stars > 5 || ratingInDto.Stars < .5) return BadRequest("Stars must be between 0.5 and 5");
+		if (ratingInDto.Stars % .5 != 0) return BadRequest("Stars must be between 0 and 5");
 
 		if (string.IsNullOrWhiteSpace(ratingInDto.Message)) return BadRequest("Message cannot be empty");
 
@@ -28,6 +31,7 @@ public class RatingsController(ILogger<RatingsController> logger, DataContext co
 		{
 			PostId = ratingInDto.PostId,
 			CreatorId = ratingInDto.UserId,
+			Stars = ratingInDto.Stars,
 			Message = ratingInDto.Message
 		};
 
