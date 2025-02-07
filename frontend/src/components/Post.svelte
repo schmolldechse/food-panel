@@ -1,5 +1,6 @@
 <script lang="ts">
 	import type {PostOutDto} from "$lib/api/Api";
+	import Star from "$components/svg/Star.svelte";
 
 	let {post}: { post: PostOutDto } = $props();
 </script>
@@ -16,4 +17,12 @@
 
     <span>{post.message}</span>
     <img src="http://localhost:9000/foodpanel/{post.id}.png" alt="bastard" height="255px" width="255px"/>
+
+    <div class="flex flex-row items-center gap-x-2">
+        <Star/>
+        <span>{post.averageRating}</span>
+
+        <span class="text-3xl align-middle">•</span>
+        <span>{post.commentAmount} Ratings</span>
+    </div>
 </div>
