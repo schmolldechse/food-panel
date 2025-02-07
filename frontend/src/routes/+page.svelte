@@ -18,6 +18,8 @@
 	fetchPosts();
 </script>
 
-{#each posts as post}
-    <Post {post} />
-{/each}
+<div class="flex flex-col divide-y divide-gray-500">
+    {#each posts as post}
+        <Post {post}/>
+    {/each}
+</div>
