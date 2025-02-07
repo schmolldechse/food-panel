@@ -14,6 +14,7 @@ export interface PostOutDto {
 	id?: string;
 	/** @format uuid */
 	creatorId?: string;
+	creatorName?: string | null;
 	title?: string | null;
 	message?: string | null;
 	/** @format int32 */
