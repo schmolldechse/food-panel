@@ -55,7 +55,7 @@
 		<!-- Profile -->
 		<a
 			class="button-base button-hover flex items-center"
-			class:bg-secondary={page.url.pathname === "/@" + context.user.userHandle}
+			class:bg-secondary={page.url.pathname === "/@" + context.user?.userHandle}
 			href={context.login ? getLoginUrl() : "/@" + context.user.userHandle}
 		>
 			<UserIcon />
