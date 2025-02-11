@@ -38,10 +38,10 @@ public class PostController(IMinioClient minio, DataContext db, UserManager<User
 		return Ok(posts);
 	}
 
-	[HttpGet("{userId:guid}")]
+	[HttpGet("user/{userId:guid}")]
 	[ProducesResponseType(StatusCodes.Status200OK, Type = typeof(PostOutDto[]))]
 	[ProducesResponseType(StatusCodes.Status404NotFound)]
-	public async Task<IActionResult> GetPostByUser(Guid userId)
+	public async Task<IActionResult> GetPostsByUser(Guid userId)
 	{
 		if (!await db.Users.AnyAsync(p => p.Id == userId)) return NotFound("User was not found");
 
@@ -64,6 +64,33 @@ public class PostController(IMinioClient minio, DataContext db, UserManager<User
 		return Ok(posts);
 	}
 
+	[HttpGet("{postId:guid}")]
+	[ProducesResponseType(StatusCodes.Status200OK, Type = typeof(PostOutDto))]
+	[ProducesResponseType(StatusCodes.Status404NotFound)]
+	public async Task<IActionResult> GetPostByUser(Guid postId)
+	{
+		var post = await db.Posts
+			.Where(post => post.Id == postId)
+			.Include(p => p.Creator)
+			.Include(p => p.Ratings) // if Ratings is a navigation property
+			.Select(post => new PostOutDto
+			{
+				Id = post.Id,
+				CreatorId = post.CreatorId,
+				CreatorName = post.Creator.Name,
+				Title = post.Title,
+				Message = post.Message,
+				CommentAmount = post.Ratings.Count,
+				AverageRating = post.Ratings.Count != 0 ? post.Ratings.Average(r => r.Stars) : 0
+			})
+			.FirstOrDefaultAsync();
+
+		if (post == null)
+			return NotFound();
+			
+		return Ok(post);
+	}
+	
 	[HttpPost]
 	[Authorize]
 	[ProducesResponseType(StatusCodes.Status201Created)]
