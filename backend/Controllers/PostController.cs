@@ -3,6 +3,8 @@ using FoodPanel.Models;
 using FoodPanel.Models.Dto;
 using ImageProcessor;
 using ImageProcessor.Imaging.Formats;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Minio;
@@ -12,7 +14,7 @@ namespace FoodPanel.Controllers;
 
 [ApiController]
 [Route("api/v1/[controller]")]
-public class PostController(IMinioClient minio, DataContext db) : ControllerBase
+public class PostController(IMinioClient minio, DataContext db, UserManager<User> userManager) : ControllerBase
 {
 	[HttpGet]
 	[ProducesResponseType(StatusCodes.Status200OK, Type = typeof(PostOutDto[]))]
@@ -63,9 +65,23 @@ public class PostController(IMinioClient minio, DataContext db) : ControllerBase
 	}
 
 	[HttpPost]
+	[Authorize]
 	[ProducesResponseType(StatusCodes.Status201Created)]
 	public async Task<IActionResult> Post([FromForm, Required] PostInDto data)
 	{
+		if (!Guid.TryParse(userManager.GetUserId(this.User), out var userId))
+		{
+			return Unauthorized();
+		}
+
+		// Use Include to eagerly load Posts and Ratings
+		var user = await db.Users
+			.Include(u => u.Posts)
+			.Include(u => u.Ratings)
+			.FirstOrDefaultAsync(u => u.Id == userId);
+
+		if (user == null) return Unauthorized();
+
 		var postId = Guid.NewGuid();
 
 		using var outputStream = new MemoryStream();
@@ -86,7 +102,7 @@ public class PostController(IMinioClient minio, DataContext db) : ControllerBase
 
 		await db.Posts.AddAsync(new Post
 		{
-			CreatorId = data.CreatorId,
+			CreatorId = user.Id,
 			Id = postId,
 			Message = data.Message,
 			Title = data.Title
@@ -98,12 +114,30 @@ public class PostController(IMinioClient minio, DataContext db) : ControllerBase
 	}
 
 	[HttpDelete]
+	[Authorize]
 	[ProducesResponseType(StatusCodes.Status200OK)]
 	[ProducesResponseType(StatusCodes.Status404NotFound)]
 	public async Task<IActionResult> Delete([FromForm] [Required] Guid postId)
 	{
-		if (!await db.Posts.AnyAsync(p => p.Id == postId)) return NotFound("Post was not found");
+		if (!Guid.TryParse(userManager.GetUserId(this.User), out var userId))
+		{
+			return Unauthorized();
+		}
 
+		// Use Include to eagerly load Posts and Ratings
+		var user = await db.Users
+			.Include(u => u.Posts)
+			.Include(u => u.Ratings)
+			.FirstOrDefaultAsync(u => u.Id == userId);
+
+		if (user == null) return Unauthorized();
+
+		if (!await db.Posts.AnyAsync(p => p.Id == postId))
+			return NotFound("Post was not found");
+
+		if ((await db.Posts.SingleAsync(p => p.Id == user.Id)).CreatorId == user.Id)
+			return Unauthorized("You are not authorized to delete this post");
+		
 		await minio.RemoveObjectAsync(new RemoveObjectArgs()
 			.WithBucket("foodpanel")
 			.WithObject($"{postId}.png"));

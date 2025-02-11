@@ -18,13 +18,36 @@ public class AuthController(
 	DataContext db)
 	: ControllerBase
 {
+	[HttpGet("@{handle}")]
+	[ProducesResponseType(typeof(UserOutDto), StatusCodes.Status200OK)]
+	[ProducesResponseType(StatusCodes.Status404NotFound)]
+	public async Task<IActionResult> GetUserInfo([FromRoute] string handle)
+	{
+		var user = await db.Users
+			.Include(u => u.Posts)
+			.Include(u => u.Ratings)
+			.FirstOrDefaultAsync(u => u.UserHandle == handle);
+
+		if (user == null) return Unauthorized();
+
+		return Ok(new UserOutDto
+		{
+			Id = user.Id,
+			Name = user.Name,
+			UserHandle = user.UserHandle,
+			PostCount = user.Posts.Count,
+			RatingCount = user.Ratings.Count,
+			AverageRating = user.Ratings.Count != 0 ? user.Ratings.Select(r => r.Stars).Average() : 0
+		});
+	}
+	
 	[HttpGet("@me")]
 	[Authorize]
 	[ProducesResponseType(typeof(UserOutDto), StatusCodes.Status200OK)]
 	[ProducesResponseType(typeof(UserOutDto), StatusCodes.Status401Unauthorized)]
 	public async Task<IActionResult> GetCurrentUser()
 	{
-		if (!Guid.TryParse(userManager.GetUserId(this.User), out var userId))
+		if (!Guid.TryParse(userManager.GetUserId(User), out var userId))
 		{
 			return Unauthorized();
 		}
@@ -103,10 +126,10 @@ public class AuthController(
 
 		var firstNameClaim = claims.SingleOrDefault(x => x.Type == ClaimTypes.GivenName)?.Value;
 		var lastNameClaim = claims.SingleOrDefault(x => x.Type == ClaimTypes.Surname)?.Value;
-		var displayNameClaim = claims.SingleOrDefault(x => x.Type == ClaimConstants.PreferredUserName)?.Value;
+		var nameClaim = claims.SingleOrDefault(x => x.Type == ClaimConstants.Name)?.Value;
 
 		if (string.IsNullOrEmpty(firstNameClaim) || string.IsNullOrEmpty(lastNameClaim) ||
-		    string.IsNullOrEmpty(displayNameClaim)) return UnprocessableEntity();
+		    string.IsNullOrEmpty(nameClaim)) return UnprocessableEntity();
 
 		var result = await signInManager.ExternalLoginSignInAsync(info.LoginProvider, providerKey, true, true);
 		if (result.Succeeded)
@@ -122,7 +145,7 @@ public class AuthController(
 					accessToken);
 			}
 
-			externalUser.Name = displayNameClaim;
+			externalUser.Name = nameClaim;
 			externalUser.UserHandle = $"{firstNameClaim}.{lastNameClaim}".ToLower();
 
 			await userManager.UpdateAsync(externalUser);
@@ -145,7 +168,7 @@ public class AuthController(
 		var user = new User
 		{
 			Email = claims.Single(x => x.Type == ClaimTypes.Email).Value,
-			UserName = claims.SingleOrDefault(x => x.Type == ClaimConstants.PreferredUserName)?.Value,
+			UserName = claims.SingleOrDefault(x => x.Type == ClaimConstants.Name)?.Value,
 			UserHandle =
 				$"{claims.SingleOrDefault(x => x.Type == ClaimTypes.GivenName)!.Value}.{claims.SingleOrDefault(x => x.Type == ClaimTypes.Surname)!.Value}"
 					.ToLower(),
