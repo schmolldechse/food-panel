@@ -11,7 +11,7 @@
 	async function createPost() {
 		if (selectedFile === undefined) return;
 
-		const response = await apiClient.post.v1PostCreate({
+		await apiClient.post.v1PostCreate({
 			Title: title,
 			Message: message,
 			Image: selectedFile
