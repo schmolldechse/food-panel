@@ -85,7 +85,16 @@ var ib = builder.Services.AddIdentityCore<User>(opt =>
 builder.Services.AddScoped<IRoleStore<UserRole>, RoleStore<UserRole, DataContext, Guid>>();
 builder.Services.AddScoped<IUserStore<User>, UserStore<User, UserRole, DataContext, Guid>>();
 
-builder.Services.AddCors(options => { options.AddPolicy(name: "*", policy => policy.AllowAnyOrigin()); });
+builder.Services.AddCors(options =>
+{
+	options.AddPolicy("dev", policy =>
+	{
+		policy.WithOrigins("http://localhost:5173")
+			.AllowCredentials()
+			.AllowAnyHeader()
+			.AllowAnyMethod();
+	});
+});
 
 builder.Services.AddControllers();
 
@@ -131,7 +140,7 @@ app.UseHttpsRedirection();
 
 app.UseAuthorization();
 
-app.UseCors("*");
+app.UseCors("dev");
 
 app.MapControllers();
 

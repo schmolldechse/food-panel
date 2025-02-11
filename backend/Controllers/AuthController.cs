@@ -168,11 +168,11 @@ public class AuthController(
 		var user = new User
 		{
 			Email = claims.Single(x => x.Type == ClaimTypes.Email).Value,
-			UserName = claims.SingleOrDefault(x => x.Type == ClaimConstants.Name)?.Value,
+			UserName = claims.SingleOrDefault(x => x.Type == ClaimConstants.PreferredUserName)?.Value,
 			UserHandle =
 				$"{claims.SingleOrDefault(x => x.Type == ClaimTypes.GivenName)!.Value}.{claims.SingleOrDefault(x => x.Type == ClaimTypes.Surname)!.Value}"
 					.ToLower(),
-			Name = $"{firstNameClaim} {lastNameClaim}"
+			Name = nameClaim
 		};
 
 		var userCreateResult = await userManager.CreateAsync(user);
