@@ -62,8 +62,8 @@ export interface Rating {
 export interface RatingInDto {
 	/** @format uuid */
 	postId?: string;
-	/** @format uuid */
-	userId?: string;
+	/** @format double */
+	stars?: number;
 	message?: string | null;
 }
 
@@ -251,6 +251,21 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
 		 * No description
 		 *
 		 * @tags Auth
+		 * @name V1AuthDetail
+		 * @request GET:/api/v1/Auth/@{handle}
+		 */
+		v1AuthDetail: (handle: string, params: RequestParams = {}) =>
+			this.request<UserOutDto, ProblemDetails>({
+				path: `/api/v1/Auth/@${handle}`,
+				method: "GET",
+				format: "json",
+				...params
+			}),
+
+		/**
+		 * No description
+		 *
+		 * @tags Auth
 		 * @name V1AuthMeList
 		 * @request GET:/api/v1/Auth/@me
 		 */
@@ -349,8 +364,6 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
 		 */
 		v1PostCreate: (
 			data: {
-				/** @format uuid */
-				CreatorId?: string;
 				Title?: string;
 				Message?: string;
 				/** @format binary */
@@ -432,15 +445,12 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
 				/** @format uuid */
 				postId: string;
 			},
-			data: string,
 			params: RequestParams = {}
 		) =>
 			this.request<void, ProblemDetails>({
 				path: `/api/v1/Ratings`,
 				method: "DELETE",
 				query: query,
-				body: data,
-				type: ContentType.Json,
 				...params
 			}),
 

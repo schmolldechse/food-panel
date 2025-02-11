@@ -13,7 +13,7 @@
 		<Sidebar />
 	</div>
 
-	<div class="flex-[6] border-x">
+	<div class="flex-[6] border-x px-20">
 		{@render children()}
 	</div>
 

@@ -20,7 +20,6 @@ export const load: LayoutServerLoad = async (context) => {
 	let user;
 	try {
 		user = await api.auth.v1AuthMeList();
-		console.log({user});
 	} catch (e) {
 		console.log("user auth request failed --> login", e);
 

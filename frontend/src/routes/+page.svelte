@@ -2,6 +2,8 @@
 	import apiClient from "$lib/ApiClient";
 	import type {PostOutDto} from "$lib/api/Api";
 	import Post from "$components/Post.svelte";
+    import { onMount } from "svelte";
+    import PostsContainer from "$components/PostsContainer.svelte";
 
 	let posts: PostOutDto[] = $state([]);
 
@@ -15,11 +17,7 @@
 		posts = data;
 	};
 
-	fetchPosts();
+    onMount(() => fetchPosts());
 </script>
 
-<div class="flex flex-col divide-y divide-gray-500">
-    {#each posts as post}
-        <Post {post}/>
-    {/each}
-</div>
+<PostsContainer {posts} />
