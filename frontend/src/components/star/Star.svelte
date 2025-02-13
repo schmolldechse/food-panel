@@ -26,7 +26,6 @@
 		</defs>
 	{/if}
 	<path
-		opacity="{readOnly ? 0.7 : 1}"
 		stroke={fillPercentage > 0 ? starConfig.strokeColor : starConfig.strokeUnfilledColor}
 		fill={fillPercentage === 1
 			? starConfig.fillColor
