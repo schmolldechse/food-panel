@@ -405,12 +405,27 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
 		 * No description
 		 *
 		 * @tags Post
-		 * @name V1PostDetail
-		 * @request GET:/api/v1/Post/{userId}
+		 * @name V1PostUserDetail
+		 * @request GET:/api/v1/Post/user/{userId}
 		 */
-		v1PostDetail: (userId: string, params: RequestParams = {}) =>
+		v1PostUserDetail: (userId: string, params: RequestParams = {}) =>
 			this.request<PostOutDto[], ProblemDetails>({
-				path: `/api/v1/Post/${userId}`,
+				path: `/api/v1/Post/user/${userId}`,
+				method: "GET",
+				format: "json",
+				...params
+			}),
+
+		/**
+		 * No description
+		 *
+		 * @tags Post
+		 * @name V1PostDetail
+		 * @request GET:/api/v1/Post/{postId}
+		 */
+		v1PostDetail: (postId: string, params: RequestParams = {}) =>
+			this.request<PostOutDto, ProblemDetails>({
+				path: `/api/v1/Post/${postId}`,
 				method: "GET",
 				format: "json",
 				...params

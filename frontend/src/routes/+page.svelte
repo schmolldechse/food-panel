@@ -1,7 +1,6 @@
 <script lang="ts">
 	import apiClient from "$lib/ApiClient";
 	import type {PostOutDto} from "$lib/api/Api";
-	import Post from "$components/Post.svelte";
     import { onMount } from "svelte";
     import PostsContainer from "$components/PostsContainer.svelte";
 
