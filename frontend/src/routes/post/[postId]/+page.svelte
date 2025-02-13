@@ -23,6 +23,8 @@
 			message: value
 		});
 		await invalidateAll();
+
+		value = "";
 	}
 </script>
 
