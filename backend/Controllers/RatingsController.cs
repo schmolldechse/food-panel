@@ -88,7 +88,7 @@ public class RatingsController(ILogger<RatingsController> logger, DataContext co
 	}
 
 	[HttpGet("getRatingsByPostId")]
-	[ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Rating[]))]
+	[ProducesResponseType(StatusCodes.Status200OK, Type = typeof(RatingOutDto[]))]
 	[ProducesResponseType(StatusCodes.Status404NotFound)]
 	public async Task<IActionResult> GetRatingsByPostId(
 		[FromQuery] [Required] Guid postId
@@ -97,15 +97,36 @@ public class RatingsController(ILogger<RatingsController> logger, DataContext co
 		var posts = await context.Posts.FindAsync(postId);
 		if (posts == null) return NotFound("Post does not exist.");
 
-		var ratings = await context.Ratings.Where(rating => rating.PostId == postId).ToArrayAsync();
+		var ratings = await context.Ratings.Include(r => r.Creator)
+			.Where(rating => rating.PostId == postId)
+			.Select(rating => new RatingOutDto()
+			{
+				Id = rating.Id,
+				CreatorId = rating.CreatorId,
+				CreatorName = rating.Creator.Name,
+				CreatorHandle = rating.Creator.UserHandle,
+				Stars = rating.Stars,
+				Message = rating.Message
+			})
+			.ToArrayAsync();
 		return Ok(ratings);
 	}
 
 	[HttpGet("getAllRatings")]
-	[ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Rating[]))]
+	[ProducesResponseType(StatusCodes.Status200OK, Type = typeof(RatingOutDto[]))]
 	public async Task<IActionResult> GetAllRatings()
 	{
-		var ratings = await context.Ratings.ToArrayAsync();
+		var ratings = await context.Ratings.Include(r => r.Creator)
+			.Select(rating => new RatingOutDto()
+			{
+				Id = rating.Id,
+				CreatorId = rating.CreatorId,
+				CreatorName = rating.Creator.Name,
+				CreatorHandle = rating.Creator.UserHandle,
+				Stars = rating.Stars,
+				Message = rating.Message
+			})
+			.ToArrayAsync();
 		return Ok(ratings);
 	}
 }

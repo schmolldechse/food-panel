@@ -9,18 +9,6 @@
  * ---------------------------------------------------------------
  */
 
-export interface Post {
-	/** @format uuid */
-	id?: string;
-	/** @format uuid */
-	creatorId?: string;
-	creator?: User;
-	/** @maxLength 128 */
-	title?: string | null;
-	message?: string | null;
-	ratings?: Rating[] | null;
-}
-
 export interface PostOutDto {
 	/** @format uuid */
 	id?: string;
@@ -45,20 +33,6 @@ export interface ProblemDetails {
 	[key: string]: any;
 }
 
-export interface Rating {
-	/** @format uuid */
-	id?: string;
-	/** @format uuid */
-	postId?: string;
-	post?: Post;
-	/** @format uuid */
-	creatorId?: string;
-	creator?: User;
-	/** @format double */
-	stars?: number;
-	message?: string | null;
-}
-
 export interface RatingInDto {
 	/** @format uuid */
 	postId?: string;
@@ -67,31 +41,16 @@ export interface RatingInDto {
 	message?: string | null;
 }
 
-export interface User {
+export interface RatingOutDto {
 	/** @format uuid */
 	id?: string;
-	userName?: string | null;
-	normalizedUserName?: string | null;
-	email?: string | null;
-	normalizedEmail?: string | null;
-	emailConfirmed?: boolean;
-	passwordHash?: string | null;
-	securityStamp?: string | null;
-	concurrencyStamp?: string | null;
-	phoneNumber?: string | null;
-	phoneNumberConfirmed?: boolean;
-	twoFactorEnabled?: boolean;
-	/** @format date-time */
-	lockoutEnd?: string | null;
-	lockoutEnabled?: boolean;
-	/** @format int32 */
-	accessFailedCount?: number;
-	/** @maxLength 255 */
-	name?: string | null;
-	/** @maxLength 32 */
-	userHandle?: string | null;
-	posts?: Post[] | null;
-	ratings?: Rating[] | null;
+	/** @format uuid */
+	creatorId?: string;
+	creatorName?: string | null;
+	creatorHandle?: string | null;
+	message?: string | null;
+	/** @format double */
+	stars?: number;
 }
 
 export interface UserOutDto {
@@ -483,7 +442,7 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
 			},
 			params: RequestParams = {}
 		) =>
-			this.request<Rating[], ProblemDetails>({
+			this.request<RatingOutDto[], ProblemDetails>({
 				path: `/api/v1/Ratings/getRatingsByPostId`,
 				method: "GET",
 				query: query,
@@ -499,7 +458,7 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
 		 * @request GET:/api/v1/Ratings/getAllRatings
 		 */
 		v1RatingsGetAllRatingsList: (params: RequestParams = {}) =>
-			this.request<Rating[], any>({
+			this.request<RatingOutDto[], any>({
 				path: `/api/v1/Ratings/getAllRatings`,
 				method: "GET",
 				format: "json",
