@@ -39,6 +39,9 @@ public class RatingsController(ILogger<RatingsController> logger, DataContext co
 		if (ratingInDto.Stars % .5 != 0) return BadRequest("Stars must be between 0 and 5");
 
 		if (string.IsNullOrWhiteSpace(ratingInDto.Message)) return BadRequest("Message cannot be empty");
+		
+		if (await context.Ratings.AnyAsync(post => post.PostId == ratingInDto.PostId && post.CreatorId == userId))
+			return Conflict("You have already rated this post");
 
 		var newRating = new Rating
 		{
