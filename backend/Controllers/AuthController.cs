@@ -40,7 +40,7 @@ public class AuthController(
 			AverageRating = user.Ratings.Count != 0 ? user.Ratings.Select(r => r.Stars).Average() : 0
 		});
 	}
-	
+
 	[HttpGet("@me")]
 	[Authorize]
 	[ProducesResponseType(typeof(UserOutDto), StatusCodes.Status200OK)]
@@ -146,7 +146,7 @@ public class AuthController(
 			}
 
 			externalUser.Name = nameClaim;
-			externalUser.UserHandle = $"{firstNameClaim}.{lastNameClaim}".ToLower();
+			externalUser.UserHandle = $"{firstNameClaim}.{lastNameClaim}".ToLower().Replace(' ', '.');
 
 			await userManager.UpdateAsync(externalUser);
 
@@ -171,7 +171,7 @@ public class AuthController(
 			UserName = claims.SingleOrDefault(x => x.Type == ClaimConstants.PreferredUserName)?.Value,
 			UserHandle =
 				$"{claims.SingleOrDefault(x => x.Type == ClaimTypes.GivenName)!.Value}.{claims.SingleOrDefault(x => x.Type == ClaimTypes.Surname)!.Value}"
-					.ToLower(),
+					.ToLower().Replace(' ', '.'),
 			Name = nameClaim
 		};
 

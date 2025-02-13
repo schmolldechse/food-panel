@@ -67,7 +67,7 @@ public class PostController(IMinioClient minio, DataContext db, UserManager<User
 	[HttpGet("{postId:guid}")]
 	[ProducesResponseType(StatusCodes.Status200OK, Type = typeof(PostOutDto))]
 	[ProducesResponseType(StatusCodes.Status404NotFound)]
-	public async Task<IActionResult> GetPostByUser(Guid postId)
+	public async Task<IActionResult> GetPostById(Guid postId)
 	{
 		var post = await db.Posts
 			.Where(post => post.Id == postId)
