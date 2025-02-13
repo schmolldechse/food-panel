@@ -8,28 +8,13 @@
 	const averageRating: number = goofyRound(post.averageRating!);
 </script>
 
-<style lang="postcss">
-    .hover-underline-animation {
-        @apply inline-block relative;
-    }
-
-    .hover-underline-animation::after {
-        @apply content-[''] absolute w-full scale-x-0 h-[2px] bottom-0 left-0 origin-left transition-all duration-300;
-        background-color: currentColor;
-    }
-
-    .hover-underline-animation:hover::after {
-        @apply scale-x-100;
-    }
-</style>
-
 <div class="py-4 flex flex-col">
 	<div class="flex flex-row justify-between">
 		<a class="text-2xl font-bold hover-underline-animation" href="/post/{post.id}">{post.title}</a>
 
 		<div class="flex flex-wrap gap-x-2 items-end">
 			<span class="text-base">by</span>
-			<span class="text-xl text-text/75">{post.creatorName}</span>
+			<a href="/@{post.creatorHandle}" class="text-xl text-text/75 hover-underline-animation">{post.creatorName}</a>
 		</div>
 	</div>
 

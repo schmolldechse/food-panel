@@ -6,3 +6,16 @@
 body {
 	@apply bg-background text-text;
 }
+
+.hover-underline-animation {
+	@apply inline-block relative;
+}
+
+.hover-underline-animation::after {
+	@apply content-[''] absolute w-full scale-x-0 h-[2px] bottom-0 left-0 origin-left transition-all duration-300;
+	background-color: currentColor;
+}
+
+.hover-underline-animation:hover::after {
+	@apply scale-x-100;
+}

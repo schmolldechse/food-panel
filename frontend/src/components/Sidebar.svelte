@@ -38,7 +38,7 @@
 <aside class="w-64 bg-primary py-[1.5px] text-white">
 	<nav class="flex flex-col gap-y-0">
 		<div class="p-4">
-			<span class="font-michroma text-xl font-bold">Foodpanel</span>
+			<a href="/" class="font-michroma text-xl font-bold">Foodpanel</a>
 		</div>
 
 		<!-- Divider -->
