@@ -7,6 +7,6 @@ export const load: PageLoad = async ({ params }): Promise<{ userData: UserOutDto
 
 	return {
 		userData,
-		posts: (await apiClient.post.v1PostDetail(userData.id!)).data
+		posts: (await apiClient.post.v1PostUserDetail(userData.id!)).data
 	}
 };

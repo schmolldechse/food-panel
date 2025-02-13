@@ -3,11 +3,14 @@
 	import PostsContainer from "$components/PostsContainer.svelte";
 	import type { PostOutDto } from "$lib/api/Api";
 	import type { PageProps } from "./$types";
-	import Star from "$components/svg/Star.svelte";
+	import StarRating from "$components/star/StarRating.svelte";
+	import { goofyRound } from "$lib";
 
 	let { data }: PageProps = $props();
 
 	let posts: PostOutDto[] = $derived(data.posts);
+
+	const averageRating: number = goofyRound(data.userData.averageRating!);
 </script>
 
 <div class="flex flex-col divide-y divide-gray-500">
@@ -22,8 +25,7 @@
 			<span class="flex flex-row gap-1 items-center">
 				<span class="text-3xl">&#x2300;</span>
 
-				<Star />
-				{data.userData.averageRating}
+				<StarRating stars={averageRating}/>
 			</span>
 		</div>
 
