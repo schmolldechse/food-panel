@@ -22,6 +22,7 @@
 
 		<div class="flex-2 flex flex-col">
 			<p class="text-right">{data.userData.postCount} posts</p>
+			<p class="text-right">{data.userData.ratingCount} ratings</p>
 			<span class="flex flex-row gap-1 items-center">
 				<span class="text-3xl">&#x2300;</span>
 
