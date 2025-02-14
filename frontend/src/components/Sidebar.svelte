@@ -3,13 +3,14 @@
 	import { HomeIcon, PlusIcon, UserIcon } from "lucide-svelte";
 	import { getContext } from "svelte";
 	import type { LayoutData } from "../../.svelte-kit/types/src/routes/$types";
+	import { apiBaseUrl } from "$lib/config";
 
 	const context: LayoutData = getContext("userData");
 
 	const returnUrl = page.url.searchParams.get("returnUrl") ?? page.url;
 
 	function getLoginUrl(): string {
-		const loginUrl = new URL(`http://localhost:5226/api/v1/Auth/signin/bosch`);
+		const loginUrl = new URL(`${apiBaseUrl}/api/v1/Auth/signin/bosch`);
 
 		let currentUri = new URL(page.url);
 		currentUri.pathname = "/";
