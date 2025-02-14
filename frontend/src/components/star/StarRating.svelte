@@ -13,12 +13,13 @@
 
 		const rect = (event.currentTarget as HTMLElement).getBoundingClientRect();
 		const percentage = (event.clientX - rect.left) / rect.width;
+		// Hilfe vom Arbeitskollegen (Herr GPT)
 		stars = goofyRound(Math.min(5, Math.max(0.5, (percentage * 4.5) + 0.5)));
 	};
 </script>
 
 <button class="relative" class:cursor-default={readOnly} onclick={handleClick}>
-	<div class="flex flex-row">
+	<span class="flex flex-row">
 		{#each Array(5) as _, id}
 			{#if id === intScore}
 				<Star readOnly={readOnly} fillPercentage={fractionScore} />
@@ -28,21 +29,15 @@
 				<Star readOnly={readOnly} fillPercentage={0} />
 			{/if}
 		{/each}
-	</div>
+	</span>
 
 	{#if !readOnly}
 		<input class="slider" type="range" min={0.5} max={5} step={0.5} bind:value={stars} aria-label="Star rating" />
 	{/if}
 </button>
 
-<style>
+<style lang="postcss">
     .slider {
-        opacity: 0;
-        cursor: pointer;
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        height: 100%;
+		@apply opacity-0 cursor-pointer absolute top-0 left-0 right-0 h-full;
     }
 </style>
