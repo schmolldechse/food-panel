@@ -19,7 +19,7 @@
 	</div>
 
 	<span>{post.message}</span>
-	<img src="/img-proxy/foodpanel/{post.id}.png" alt="post haha" height="255px" width="255px" />
+	<img src="/img-proxy/foodpanel/{post.id}.webp" alt="post haha" height="255px" width="255px" />
 
 	<div class="flex flex-row items-center gap-x-2">
 		<StarRating stars={averageRating} />
