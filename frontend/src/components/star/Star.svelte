@@ -1,8 +1,6 @@
 <script lang="ts">
-	// Destructure readOnly and fillPercentage from props (id removed)
-	let { readOnly = false, fillPercentage }: { readOnly: boolean, fillPercentage: number } = $props();
+	let { fillPercentage }: { readOnly: boolean, fillPercentage: number } = $props();
 
-	// Generate a unique gradient ID for this component instance
 	const gradientId = "linear-gradient-" + Math.random().toString(36).substring(2, 9);
 
 	const starConfig = {
