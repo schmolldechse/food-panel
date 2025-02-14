@@ -1,5 +1,6 @@
 <script lang="ts">
 	import Star from "$components/star/Star.svelte";
+    import { goofyRound } from "$lib";
 
 	let {stars = $bindable(0.5), readOnly = true}: { stars: number, readOnly?: boolean } = $props();
 
@@ -12,7 +13,7 @@
 
 		const rect = (event.currentTarget as HTMLElement).getBoundingClientRect();
 		const percentage = (event.clientX - rect.left) / rect.width;
-		stars = Math.min(5, Math.max(0.5, (percentage * 4.5) + 0.5));
+		stars = goofyRound(Math.min(5, Math.max(0.5, (percentage * 4.5) + 0.5)));
 	}
 </script>
 
