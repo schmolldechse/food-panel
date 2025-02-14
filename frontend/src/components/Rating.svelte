@@ -8,7 +8,7 @@
 <div>
     <div class="flex flex-row justify-between">
         <span class="text-white/70 text-lg">{rating?.creatorName}</span>
-        <StarRating stars={rating?.stars}/>
+        <StarRating stars={rating?.stars ?? 0}/>
     </div>
 
     <span>{rating?.message}</span>
