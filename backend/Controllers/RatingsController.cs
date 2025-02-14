@@ -62,7 +62,7 @@ public class RatingsController(ILogger<RatingsController> logger, DataContext co
 	[Authorize]
 	[ProducesResponseType(StatusCodes.Status404NotFound)]
 	[ProducesResponseType(StatusCodes.Status200OK)]
-	public async Task<IActionResult> DeleteRating([Required] Guid postId)
+	public async Task<IActionResult> DeleteRating([Required] Guid ratingId)
 	{
 		if (!Guid.TryParse(userManager.GetUserId(this.User), out var userId))
 		{
@@ -77,10 +77,10 @@ public class RatingsController(ILogger<RatingsController> logger, DataContext co
 
 		if (user == null) return Unauthorized();
 
-		if (!await context.Posts.AnyAsync(post => post.Id == postId))
-			return NotFound("Post does not exist");
+		if (!await context.Ratings.AnyAsync(rating => rating.Id == ratingId))
+			return NotFound("Rating does not exist");
 
-		await context.Ratings.Where(rating => rating.CreatorId == userId && rating.PostId == postId)
+		await context.Ratings.Where(rating => rating.CreatorId == userId && rating.Id == ratingId)
 			.ExecuteDeleteAsync();
 		await context.SaveChangesAsync();
 

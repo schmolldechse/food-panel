@@ -417,7 +417,7 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
 		v1RatingsDelete: (
 			query: {
 				/** @format uuid */
-				postId: string;
+				ratingId: string;
 			},
 			params: RequestParams = {}
 		) =>
