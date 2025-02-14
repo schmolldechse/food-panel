@@ -5,7 +5,7 @@
 
 	let { post }: { post: PostOutDto } = $props();
 
-	const averageRating: number = goofyRound(post.averageRating!);
+	const averageRating: number = $derived(goofyRound(post.averageRating!));
 </script>
 
 <div class="py-4 flex flex-col">
