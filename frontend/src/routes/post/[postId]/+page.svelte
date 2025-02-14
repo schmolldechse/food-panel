@@ -41,7 +41,6 @@
 	};
 </script>
 
-<p>{showToast}</p>
 {#if showToast}
 	<Toast ondissmiss={() => showToast = false} message="You have already rated this post." duration={5000} />
 {/if}
