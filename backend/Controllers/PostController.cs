@@ -1,14 +1,14 @@
 using System.ComponentModel.DataAnnotations;
 using FoodPanel.Models;
 using FoodPanel.Models.Dto;
-using ImageProcessor;
-using ImageProcessor.Imaging.Formats;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Minio;
 using Minio.DataModel.Args;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.Formats.Webp;
 
 namespace FoodPanel.Controllers;
 
@@ -116,18 +116,28 @@ public class PostController(IMinioClient minio, DataContext db, UserManager<User
 
 		using var outputStream = new MemoryStream();
 
-		// Convert image to png
-		using (var imageFactory = new ImageFactory())
+		// Convert image to PNG
+		using (var image = await Image.LoadAsync(data.Image.OpenReadStream()))
 		{
-			imageFactory.Load(data.Image.OpenReadStream())
-				.Format(new PngFormat())
-				.Save(outputStream);
+			// Save the image as PNG to the output stream
+			await image.SaveAsync(outputStream, new WebpEncoder()
+			{
+				Quality = 50,
+				FileFormat = WebpFileFormatType.Lossy,
+				Method = WebpEncodingMethod.Level3,
+			});
 		}
+
+		outputStream.Seek(0, SeekOrigin.Begin);
 
 		await minio.PutObjectAsync(new PutObjectArgs()
 			.WithBucket("foodpanel")
-			.WithObject($"{postId}.png")
+			.WithObject($"{postId}.webp")
 			.WithObjectSize(outputStream.Length)
+			.WithHeaders(new Dictionary<string, string>()
+			{
+				{ "Content-Type", "image/webp" }
+			})
 			.WithStreamData(outputStream));
 
 		await db.Posts.AddAsync(new Post
