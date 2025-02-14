@@ -13,20 +13,20 @@
 	const deleteRating = async (ratingId: string) => {
 		await apiClient.ratings.v1RatingsDelete({ ratingId: ratingId });
 		await invalidateAll();
-	}
+	};
 </script>
 
 <div>
 	<div class="flex flex-row justify-between">
 		<span class="text-white/70 text-lg">{rating?.creatorName}</span>
 		<div class="flex flex-row gap-x-2 items-center">
-			<StarRating stars={rating?.stars ?? 0} />
 			{#if userData?.currentUser.id === rating.creatorId}
 				<Trash2 color="red" class="cursor-pointer" onclick={() => {
 					if (!rating.id) return;
 					deleteRating(rating.id);
 				}} />
 			{/if}
+			<StarRating stars={rating?.stars ?? 0} />
 		</div>
 	</div>
 
