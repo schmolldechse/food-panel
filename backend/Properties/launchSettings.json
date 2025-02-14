@@ -21,6 +21,18 @@
         "HTTPS_PROXY": "http://localhost:3128"
       }
     },
+    "http public": {
+      "commandName": "Project",
+      "dotnetRunMessages": true,
+      "launchBrowser": false,
+      "launchUrl": "swagger",
+      "applicationUrl": "http://0.0.0.0:5226",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "HTTP_PROXY": "http://localhost:3128",
+        "HTTPS_PROXY": "http://localhost:3128"
+      }
+    },
     "https": {
       "commandName": "Project",
       "dotnetRunMessages": true,

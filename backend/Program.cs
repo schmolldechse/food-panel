@@ -95,6 +95,14 @@ builder.Services.AddCors(options =>
 			.AllowAnyHeader()
 			.AllowAnyMethod();
 	});
+	
+	options.AddPolicy("*", policy =>
+	{
+		policy.SetIsOriginAllowed(_ => true)
+			.AllowCredentials()
+			.AllowAnyHeader()
+			.AllowAnyMethod();
+	});
 });
 
 builder.Services.AddControllers().AddJsonOptions(options =>
@@ -145,6 +153,7 @@ app.UseHttpsRedirection();
 app.UseAuthorization();
 
 app.UseCors("dev");
+app.UseCors("*");
 
 app.MapControllers();
 
